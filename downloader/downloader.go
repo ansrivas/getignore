@@ -13,42 +13,46 @@ import (
 )
 
 var (
-	BaseURL     = "https://api.github.com/repos/github/gitignore/git/trees/HEAD"
-	DownloadURL = "https://raw.githubusercontent.com/github/gitignore/master/"
+	baseURL     = "https://api.github.com/repos/github/gitignore/git/trees/HEAD"
+	downloadURL = "https://raw.githubusercontent.com/github/gitignore/master/"
 )
 
-type Language struct {
-	Path string `json:"path"`
-	Mode string `json:"mode"`
-	Type string `json:"type"`
-	Sha  string `json:"sha"`
-	Size int    `json:"size"`
-	Url  string `json:"url"`
+type language struct {
+	Path  string `json:"path"`
+	Mode  string `json:"mode"`
+	Stype string `json:"type"`
+	Sha   string `json:"sha"`
+	Size  int    `json:"size"`
+	URL   string `json:"url"`
 }
 
-type Response struct {
+type response struct {
 	Sha  string     `json:"sha"`
-	Url  string     `json:"url"`
-	Tree []Language `json:"tree"`
+	URL  string     `json:"url"`
+	Tree []language `json:"tree"`
 }
 
-type Downloader struct {
+// GetIgnore encapsulates request pointer and a languageMap which associates a
+// integer string to a language. i.e. [1] -> "python"
+type GetIgnore struct {
 	request     *gorequest.SuperAgent
 	languageMap map[string]string
 }
 
-func New() *Downloader {
+// New returns a new GetIgnore instance which can be used for listing
+// and downloading, available .gitignore files.
+func New() *GetIgnore {
 	request := gorequest.New()
-	downloader := Downloader{request: request,
+	downloader := GetIgnore{request: request,
 		languageMap: make(map[string]string),
 	}
 	return &downloader
 }
 
 //ListLanguages displays the list of languages for which gitignore is available
-func (d *Downloader) ListLanguages(display bool) {
-	var listResp Response
-	_, body, errs := d.request.Get(BaseURL).End()
+func (gi *GetIgnore) ListLanguages(display bool) {
+	var listResp response
+	_, body, errs := gi.request.Get(baseURL).End()
 	check(errs)
 
 	err := json.Unmarshal([]byte(body), &listResp)
@@ -58,7 +62,7 @@ func (d *Downloader) ListLanguages(display bool) {
 	for idx, val := range listResp.Tree {
 		lang := strings.Split(val.Path, ".gitignore")[0]
 		if !strings.HasPrefix(lang, ".") {
-			d.languageMap[strings.ToLower(lang)] = lang
+			gi.languageMap[strings.ToLower(lang)] = lang
 			if display == true {
 				fmt.Println(idx, ":", lang)
 			}
@@ -66,8 +70,8 @@ func (d *Downloader) ListLanguages(display bool) {
 	}
 }
 
-//writeFile writes a given content to  a file
-func WriteFile(content, lang string) {
+// writeFile writes a given content to a file
+func writeFile(content, lang string) {
 
 	f, err := os.Create(".gitignore")
 	if err != nil {
@@ -79,32 +83,32 @@ func WriteFile(content, lang string) {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	fmt.Printf("\033[32mSuccessfully downloaded .gitignore for %v in present working directory.\033[39m\n\n", lang)
+	fmt.Printf("\033[32mSuccessfully downloaded .gitignore for %v in current working directory.\033[39m\n\n", lang)
 	f.Sync()
 }
 
-//DownloadFile downloads a gitignore for a given `language`
-func (d *Downloader) DownloadFile(language string) {
+// DownloadFile downloads a gitignore for a given `language`
+func (gi *GetIgnore) DownloadFile(language string) {
 
 	//Populate the list
-	d.ListLanguages(false)
+	gi.ListLanguages(false)
 
 	//fetch the correct language
-	lang, ok := d.languageMap[language]
+	lang, ok := gi.languageMap[language]
 	if !ok {
 		log.Fatalf("\033[31mUnable to find gitignore for language `%s`.\033[39m\n\n", language)
 	}
 
-	fetchURL := ParseLangUrl(lang)
+	fetchURL := parseLangURL(lang)
 
-	resp, body, errs := d.request.Get(fetchURL).End()
+	resp, body, errs := gi.request.Get(fetchURL).End()
 	if errs != nil {
 		log.Fatalln("\033[31mFailed to download, please retry.\033[39m\n\n")
 	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Fatalf("\033[31mWrong url queried: %s\033[39m\n\n", fetchURL)
 	}
-	WriteFile(body, lang)
+	writeFile(body, lang)
 }
 
 func check(e []error) {
@@ -113,14 +117,14 @@ func check(e []error) {
 	}
 }
 
-//ParseLangUrl parses a given language and generates a proper link to download from github.
+// parseLangURL parses a given language and generates a proper link to download from github.
 // eg. "https://raw.githubusercontent.com/github/gitignore/master/Python.gitignore"
-func ParseLangUrl(lang string) string {
+func parseLangURL(lang string) string {
 	u, err := url.Parse(lang + ".gitignore")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	base, err := url.Parse(DownloadURL)
+	base, err := url.Parse(downloadURL)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

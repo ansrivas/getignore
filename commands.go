@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	Downloader = downloader.New()
+	GetIgnore = downloader.New()
 	rootCmd    = &cobra.Command{Use: "getignore"}
 )
 
@@ -25,7 +25,7 @@ var cmdList = &cobra.Command{
 	Short: "Display a list of available gitignore files.",
 	Long:  `Display a list of available gitignore files available on github.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		Downloader.ListLanguages(true)
+		GetIgnore.ListLanguages(true)
 	},
 }
 
@@ -42,6 +42,6 @@ var cmdDwnld = &cobra.Command{
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		Downloader.DownloadFile(args[0])
+		GetIgnore.DownloadFile(args[0])
 	},
 }
