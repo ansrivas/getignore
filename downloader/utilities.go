@@ -27,7 +27,7 @@ var (
 	downloadURL = "https://raw.githubusercontent.com/github/gitignore/master/"
 )
 
-// language struct is to unmarshal the respone from baseURL which contains all
+// language struct is to unmarshal the response from baseURL which contains all
 // the languages with their corresponding url for .gitignore files.
 type language struct {
 	Path  string `json:"path"`
