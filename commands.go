@@ -64,7 +64,7 @@ var cmdLicenseList = &cobra.Command{
 }
 
 var cmdIgnoreDwnld = &cobra.Command{
-	Use:     "download [language to download gitignore for]",
+	Use:     "downloadIgnore [language to download gitignore for]",
 	Short:   "Download a gitignore file for the given language.",
 	Long:    `Download a gitignore from github for a given language.`,
 	Example: "getignore download python",
