@@ -22,9 +22,20 @@
 
 package downloader
 
+import (
+	"fmt"
+	"log"
+	"os"
+	"regexp"
+	"strings"
+)
+
 var (
-	baseURL     = "https://api.github.com/repos/github/gitignore/git/trees/HEAD"
-	downloadURL = "https://raw.githubusercontent.com/github/gitignore/master/"
+	baseIgnoreURL     = "https://api.github.com/repos/github/gitignore/git/trees/HEAD"
+	downloadIgnoreURL = "https://raw.githubusercontent.com/github/gitignore/master/"
+	baseLicensesURL   = "https://api.github.com/licenses"
+	gitignoreFile     = ".gitignore"
+	licenseFile       = "LICENSE"
 )
 
 // language struct is to unmarshal the response from baseURL which contains all
@@ -42,4 +53,56 @@ type response struct {
 	Sha  string     `json:"sha"`
 	URL  string     `json:"url"`
 	Tree []language `json:"tree"`
+}
+
+type licenseResponse struct {
+	Licenses []license
+}
+
+type license struct {
+	Key      string `json:"key"`
+	Name     string `json:"name"`
+	Spdxid   string `json:"spdx_id"`
+	URL      string `json:"url"`
+	Featured bool   `json:"featured"`
+}
+
+type licenseBody struct {
+	Key            string   `json:"key"`
+	Name           string   `json:"name"`
+	Spdxid         string   `json:"spdx_id"`
+	URL            string   `json:"url"`
+	Featured       bool     `json:"featured"`
+	HTMLURL        string   `json:"html_url"`
+	Description    string   `json:"description"`
+	Implementation string   `json:"implementation"`
+	Permissions    []string `json:"permissions"`
+	Conditions     []string `json:"conditions"`
+	Limitations    []string `json:"limitations"`
+	Body           string   `json:"body"`
+}
+
+func normalizeString(input string) (string, error) {
+
+	re := regexp.MustCompile(`[-.]`)
+	output := re.ReplaceAllString(input, "")
+	output = strings.ToLower(output)
+	return output, nil
+}
+
+// writeFile writes a given content to a file
+func writeFile(content, filename string) {
+
+	f, err := os.Create(filename)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(content)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	fmt.Printf("\033[32mSuccessfully downloaded %v in current working directory.\033[39m\n\n", filename)
+	f.Sync()
 }

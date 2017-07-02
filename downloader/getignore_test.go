@@ -24,6 +24,7 @@ package downloader
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,8 +41,17 @@ func Test_WriteFile(t *testing.T) {
 	assert := assert.New(t)
 	expected := "Hello world"
 
-	writeFile("Hello world", "")
-	dat, err := ioutil.ReadFile(".gitignore")
-	assert.Nil(err, "WriteFile should have created `.gitignore` in pwd")
+	writeFile("Hello world", "testfile")
+	defer func() {
+		err := os.Remove("testfile")
+		if err != nil {
+			assert.Fail("Unable to write file")
+		}
+	}()
+
+	dat, err := ioutil.ReadFile("testfile")
+
+	assert.Nil(err, "WriteFile should have created `testfile` in pwd")
 	assert.Equal(expected, string(dat), "Successfully write a file")
+
 }
