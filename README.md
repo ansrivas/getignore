@@ -9,8 +9,10 @@ Usage:
   getignore [command]
 
 Available Commands:
-  download    Download a gitignore file for the given language.
-  list        Display a list of available gitignore files.
+  download        Download a gitignore file for the given language.
+  downloadLicense Download a license file from github.
+  listIgnores     Display a list of available gitignore files.
+  listLicenses    Display a list of available licenses.
 
 Use "getignore [command] --help" for more information about a command.
 ```
