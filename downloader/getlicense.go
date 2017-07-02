@@ -64,7 +64,7 @@ func (gl *GetLicense) DownloadFile(licenseInput string) {
 	if !ok {
 		log.Fatalf("\033[31mUnable to find license file for `%s`.\033[39m\n\n", lindex)
 	}
-	log.Println("Now downloading url:", url)
+
 	resp, body, errs := gl.request.Get(url).Set("Accept", "application/vnd.github.drax-preview+json").End()
 	if errs != nil {
 		log.Fatalln("\033[31mFailed to download, please retry.\033[39m\n\n")
