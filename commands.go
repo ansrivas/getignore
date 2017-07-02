@@ -31,19 +31,22 @@ import (
 )
 
 var (
-	getIgnore = downloader.New()
-	rootCmd   = &cobra.Command{Use: "getignore"}
+	getIgnore  = downloader.NewGitIgnore()
+	getLicense = downloader.NewLicense()
+	rootCmd    = &cobra.Command{Use: "getignore"}
 )
 
 func init() {
 
-	rootCmd.AddCommand(cmdList)
-	rootCmd.AddCommand(cmdDwnld)
+	rootCmd.AddCommand(cmdIgnoreList)
+	rootCmd.AddCommand(cmdIgnoreDwnld)
+	rootCmd.AddCommand(cmdLicenseList)
+	rootCmd.AddCommand(cmdLicenseDwnld)
 
 }
 
-var cmdList = &cobra.Command{
-	Use:   "list",
+var cmdIgnoreList = &cobra.Command{
+	Use:   "listIgnores",
 	Short: "Display a list of available gitignore files.",
 	Long:  `Display a list of available gitignore files available on github.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -51,7 +54,16 @@ var cmdList = &cobra.Command{
 	},
 }
 
-var cmdDwnld = &cobra.Command{
+var cmdLicenseList = &cobra.Command{
+	Use:   "listLicenses",
+	Short: "Display a list of available licenses.",
+	Long:  `Display a list of available license files available on github.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		getLicense.ListLicenses(true)
+	},
+}
+
+var cmdIgnoreDwnld = &cobra.Command{
 	Use:     "download [language to download gitignore for]",
 	Short:   "Download a gitignore file for the given language.",
 	Long:    `Download a gitignore from github for a given language.`,
@@ -65,5 +77,22 @@ var cmdDwnld = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		getIgnore.DownloadFile(args[0])
+	},
+}
+
+var cmdLicenseDwnld = &cobra.Command{
+	Use:     "downloadLicense [license to download]",
+	Short:   "Download a license file from github.",
+	Long:    `Download a license file from github for a given license string.`,
+	Example: "getignore downloadLicense lgpl-3.0",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if len(args) != 1 {
+			curcmd, _, _ := rootCmd.Find([]string{"downloadLicense"})
+			fmt.Printf("\033[31m%s\033[39m\n\n", curcmd.UsageString())
+			os.Exit(1)
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		getLicense.DownloadFile(args[0])
 	},
 }

@@ -23,35 +23,45 @@
 package downloader
 
 import (
-	"io/ioutil"
-	"os"
+	"log"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func Test_ParseLangUrl(t *testing.T) {
-	assert := assert.New(t)
-	expected := "https://raw.githubusercontent.com/github/gitignore/master/Python.gitignore"
-	actual := parseLangURL("Python")
-	assert.Equal(expected, actual, "Urls must be formatted properly for downloads")
+type licenseTestSuite struct {
+	suite.Suite
+	getlicense *GetLicense
 }
 
-func Test_WriteFile(t *testing.T) {
+func (suite *licenseTestSuite) SetupTest() {
+
+	suite.getlicense = NewLicense()
+}
+
+func (suite *licenseTestSuite) TearDownTest() {
+	log.Println("This should have been printed after each test to cleanup resoures.")
+}
+
+func (suite *licenseTestSuite) Test_ListLicenses() {
+	suite.getlicense.ListLicenses(true)
+	suite.NotEmpty(suite.getlicense.licenseMap, "License name-url should be populated")
+}
+
+func TestLicenseTestSuite(t *testing.T) {
+	suite.Run(t, new(licenseTestSuite))
+}
+
+func Test_StripChars(t *testing.T) {
 	assert := assert.New(t)
-	expected := "Hello world"
+	actual := []string{"bsd-2-clause", "lgpl-3.0", "agpl-3-.0", "MIT-30.0"}
+	expected := []string{"bsd2clause", "lgpl30", "agpl30", "mit300"}
 
-	writeFile("Hello world", "testfile")
-	defer func() {
-		err := os.Remove("testfile")
-		if err != nil {
-			assert.Fail("Unable to write file")
-		}
-	}()
+	for i, val := range actual {
+		output, err := normalizeString(val)
+		assert.Nil(err, "Should successfully replace")
+		assert.Equal(expected[i], output, "Regex should have cleaned up the string properly")
 
-	dat, err := ioutil.ReadFile("testfile")
-
-	assert.Nil(err, "WriteFile should have created `testfile` in pwd")
-	assert.Equal(expected, string(dat), "Successfully write a file")
-
+	}
 }

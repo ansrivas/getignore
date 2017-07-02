@@ -28,7 +28,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.com/parnurzeal/gorequest"
@@ -41,11 +40,12 @@ type GetIgnore struct {
 	languageMap map[string]string
 }
 
-// New returns a new GetIgnore instance which can be used for listing
+// NewGitIgnore returns a new GetIgnore instance which can be used for listing
 // and downloading, available .gitignore files.
-func New() *GetIgnore {
+func NewGitIgnore() *GetIgnore {
 	request := gorequest.New()
-	downloader := GetIgnore{request: request,
+	downloader := GetIgnore{
+		request:     request,
 		languageMap: make(map[string]string),
 	}
 	return &downloader
@@ -54,7 +54,7 @@ func New() *GetIgnore {
 // ListLanguages displays the list of languages for which gitignore is available
 func (gi *GetIgnore) ListLanguages(display bool) {
 	var listResp response
-	_, body, errs := gi.request.Get(baseURL).End()
+	_, body, errs := gi.request.Get(baseIgnoreURL).End()
 	check(errs)
 
 	err := json.Unmarshal([]byte(body), &listResp)
@@ -70,23 +70,6 @@ func (gi *GetIgnore) ListLanguages(display bool) {
 			}
 		}
 	}
-}
-
-// writeFile writes a given content to a file
-func writeFile(content, lang string) {
-
-	f, err := os.Create(".gitignore")
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	defer f.Close()
-
-	_, err = f.WriteString(content)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	fmt.Printf("\033[32mSuccessfully downloaded .gitignore for %v in current working directory.\033[39m\n\n", lang)
-	f.Sync()
 }
 
 // DownloadFile downloads a gitignore for a given `language`
@@ -110,7 +93,7 @@ func (gi *GetIgnore) DownloadFile(language string) {
 	if resp.StatusCode == http.StatusNotFound {
 		log.Fatalf("\033[31mWrong url queried: %s\033[39m\n\n", fetchURL)
 	}
-	writeFile(body, lang)
+	writeFile(body, gitignoreFile)
 }
 
 func check(e []error) {
@@ -126,7 +109,7 @@ func parseLangURL(lang string) string {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	base, err := url.Parse(downloadURL)
+	base, err := url.Parse(downloadIgnoreURL)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
