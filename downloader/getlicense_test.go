@@ -26,7 +26,6 @@ import (
 	"log"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -51,17 +50,4 @@ func (suite *licenseTestSuite) Test_ListLicenses() {
 
 func TestLicenseTestSuite(t *testing.T) {
 	suite.Run(t, new(licenseTestSuite))
-}
-
-func Test_StripChars(t *testing.T) {
-	assert := assert.New(t)
-	actual := []string{"bsd-2-clause", "lgpl-3.0", "agpl-3-.0", "MIT-30.0"}
-	expected := []string{"bsd2clause", "lgpl30", "agpl30", "mit300"}
-
-	for i, val := range actual {
-		output, err := normalizeString(val)
-		assert.Nil(err, "Should successfully replace")
-		assert.Equal(expected[i], output, "Regex should have cleaned up the string properly")
-
-	}
 }

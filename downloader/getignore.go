@@ -79,6 +79,11 @@ func (gi *GetIgnore) DownloadFile(language string) {
 	gi.ListLanguages(false)
 
 	//fetch the correct language
+	language, err := normalizeString(language)
+	if err != nil {
+		log.Fatalf("\033[31mUnable to normalize %s to download\033[39m", language)
+	}
+
 	lang, ok := gi.languageMap[language]
 	if !ok {
 		log.Fatalf("\033[31mUnable to find gitignore for language `%s`.\033[39m\n\n", language)
