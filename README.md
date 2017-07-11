@@ -4,12 +4,12 @@ Get your gitignore file directly from github
 ---
 ### Usage
 ```
-$ getignore
+→ getignore 
 Usage:
   getignore [command]
 
 Available Commands:
-  download        Download a gitignore file for the given language.
+  downloadIgnore  Download a gitignore file for the given language.
   downloadLicense Download a license file from github.
   listIgnores     Display a list of available gitignore files.
   listLicenses    Display a list of available licenses.
