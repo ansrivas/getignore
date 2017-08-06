@@ -1,0 +1,13 @@
+language: go
+
+dist: trusty
+
+before_install:
+  - chmod +x ./test.sh
+
+go:
+  - 1.7
+  - 1.8
+  - tip
+
+script: make test

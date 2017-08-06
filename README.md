@@ -1,5 +1,8 @@
 # getignore
+
 Get your gitignore file directly from github
+
+[![Build Status](https://travis-ci.org/ansrivas/getignore.svg?branch=master)](https://travis-ci.org/ansrivas/getignore)
 
 ---
 ### Usage

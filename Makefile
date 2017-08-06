@@ -6,6 +6,7 @@ help:          ## Show available options with this Makefile
 .PHONY : test
 test:          ## Run all the tests
 test:
+	@GOOS=linux go build -ldflags="-s -w" github.com/ansrivas/getignore && \
 	./test.sh
 
 clean:         ## Clean the application
